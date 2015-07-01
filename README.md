@@ -5,9 +5,13 @@ express demo
 
 ##运行所需环境
 npm install -g express
+
 npm install express-generator -g
+
 cd expressDemo && npm install
+
 npm install -g mongodb
+
 mongod --dbpath=/data --port 27017
 
 
