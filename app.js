@@ -5,9 +5,14 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var ejs = require('ejs');
+//session
+var session = require('express-session');
+var RedisStore = require('connect-redis')(session);
+
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
+
 
 var app = express();
 
@@ -23,10 +28,41 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+// app.use(express.cookieSession({secret : 'fens.me'}));
+app.use(session({
+  // store: new RedisStore({
+  //   host: "127.0.0.1",
+  //   port: 27017,
+  //   db: "expressDemo"
+  // }),
+  resave:false,
+  saveUninitialized:false,
+  secret : 'connect-redis',
+  cookie: { maxAge: 900000 }
+}));
+
+app.use(function(req, res, next){
+  console.log('in session');
+  res.locals.user = req.session.user;
+  next();
+});
+
+app.use(function(req, res, next){
+  console.log('in message');
+  res.locals.user = req.session.user;
+  var err = req.session.err;
+  delete req.session.err;
+  res.locals.message = '';
+  if (err) res.locals.message = '<div class="alert alert-error">' + err + '</div>';
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
